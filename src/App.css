@@ -1,9 +1,29 @@
 
 body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 .App {
   text-align: center;
+}
+
+.background {
+  background: linear-gradient(180deg, #f0f8ff 0%, #d6eaff 50%, #b5ccff 100%) !important;
+  /* background: linear-gradient(180deg, #fefff0 0%, #fcffd6 50%, #f3ffb5 100%) !important; */
+  display: table-cell;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.chat-background {
+  background: linear-gradient(180deg, #f0f8ff 0%, #d6eaff 50%, #b5ccff 100%) !important;
+  /* background: linear-gradient(180deg, #fefff0 0%, #fcffd6 50%, #f3ffb5 100%) !important; */
+  display: table-cell;
+  object-fit: cover;
+  vertical-align: middle;
 }
 
 .App-logo {
@@ -67,3 +87,27 @@ body {
   /* background: linear-gradient(-135deg, #69A9E9 25%, #3472F9 100%); */
 }
 
+/* .background-photo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -11;
+  object-fit: cover;
+  opacity: 0.9;
+} */
+.nothing{
+  background:linear-gradient(-135deg, #8fd1fd 25%, #69A9E9  100%);
+  color: #ffffff76
+}
+
+.chatHeader{
+  margin: 0 auto;
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* max-width: 50%; */
+}
