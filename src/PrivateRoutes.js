@@ -1,8 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 const PrivateRoutes = () => {
-    const cookies = new Cookies;
-
+    const cookies = new Cookies();
     let authToken = cookies.get("auth-cookie");
 
 return (

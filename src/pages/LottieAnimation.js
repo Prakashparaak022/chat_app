@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Grid2 as Grid, Paper } from "@mui/material";
+import { Box, Grid2 as Grid } from "@mui/material";
 import Lottie from "lottie-react";
 
 export const LottieAnimation = (props) => {
@@ -10,7 +10,7 @@ export const LottieAnimation = (props) => {
     if (currentAnimation >= animationList?.length) {
       setCurrentAnimation(0);
     }
-  }, [currentAnimation]);
+  }, [currentAnimation, animationList]);
 
   const handleAnimation = () => {
     setCurrentAnimation((prev) => prev + 1);
@@ -33,7 +33,6 @@ export const LottieAnimation = (props) => {
       </Box>
       <p
         style={{
-          marginTop: "20px",
           textAlign: "center",
           marginTop: "-10px",
           color: "rgba(255, 215, 0, 1)",

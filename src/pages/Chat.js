@@ -92,7 +92,7 @@ export const Chat = () => {
     });
 
     return () => allUserListQuery();
-  }, []);
+  }, [usersCollection]);
 
   // InBox List
   useEffect(() => {
@@ -129,7 +129,7 @@ export const Chat = () => {
       fetchSenderMsg();
       fetchRecepientMsg();
     };
-  }, [roomId, selectedUser]);
+  }, [roomId, selectedUser, msgCollection, userId]);
 
   // proper messsage
   useEffect(() => {
@@ -175,7 +175,7 @@ export const Chat = () => {
 
       return () => unsubscribe();
     }
-  }, [roomId, selectedUser]);
+  }, [roomId, selectedUser, allUserList, currentUser, inBoxList, manualRoomId, msgCollection, userId]);
 
   //Searched Users
   useEffect(() => {
@@ -184,7 +184,7 @@ export const Chat = () => {
       return username && username.includes(searchTerm.toLowerCase());
     });
     setSearchedUsers(searchedUsersTemp);
-  }, [searchTerm]);
+  }, [searchTerm, allUserList]);
 
   // Filtered Users
   const inBoxUsersList = [];
@@ -259,7 +259,7 @@ export const Chat = () => {
     return () => {
       unsubscribeList.forEach((unsubscribe) => unsubscribe());
     };
-  }, [roomIdList]); // depend on roomIdList
+  }, [roomIdList, msgCollection]); // depend on roomIdList
 
 
   const handleManualRoomIdSubmit = (input) => {
@@ -626,7 +626,10 @@ export const Chat = () => {
                   }}>
                   <Button
                     sx={{ marginLeft: "-20px" }}
-                    onClick={() => (setSelectedUser(null), setManualRoomId(""))}
+                    onClick={() => {
+                      setSelectedUser(null)
+                      setManualRoomId("")
+                    }}
                     startIcon={<ArrowBackIcon />}></Button>
                   {/* Image , selected User*/}
                   {selectedUser && (
