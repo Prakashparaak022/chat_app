@@ -74,12 +74,12 @@ export default function SignUp() {
         let userList = [];
         const querySnapshot = await getDocs(userQuery);
         querySnapshot.forEach((doc) => {
-          userList.push({ ...doc.data(), id: doc.id });
+          userList.push({ ...doc.data(), docId: doc.id });
         });
 
         if (!userList || userList.length <= 0) {
           const docUserRef = await addDoc(userCollection, {
-            userId: generateUserId(result.user.displayName),
+            id: generateUserId(result.user.displayName),
             username: result.user.displayName,
             email: userEmail,
             password: "",
@@ -93,8 +93,8 @@ export default function SignUp() {
             if (userSnapshot.exists()) {
               const userDetail = userSnapshot.data();
               cookies.set("auth-cookie", result.user.accessToken);
-              cookies.set("userId", userDetail.userId);
-              setUserId(userDetail.userId);
+              cookies.set("userId", userDetail.id);
+              setUserId(userDetail.id);
               setIsAuth(true);
               setAuthenticated(true);
             } else {
@@ -105,8 +105,8 @@ export default function SignUp() {
           console.log("Existing User ");
           const userDetail = userList[0];
           cookies.set("auth-cookie", result.user.accessToken);
-          cookies.set("userId", userDetail.userId);
-          setUserId(userDetail.userId);
+          cookies.set("userId", userDetail.id);
+          setUserId(userDetail.id);
           setIsAuth(true);
           setAuthenticated(true);
         }
@@ -166,10 +166,8 @@ export default function SignUp() {
       let userList = [];
       const querySnapshot = await getDocs(userQuery);
       querySnapshot.forEach((doc) => {
-        userList.push({ ...doc.data(), id: doc.id });
+        userList.push({ ...doc.data(), docId: doc.id });
       });
-
-      console.log("userList", userList);
 
       if (!userList || userList.length <= 0) {
         try {
@@ -181,7 +179,7 @@ export default function SignUp() {
           const user = userCredential.user;
 
           const docUserRef = await addDoc(userCollection, {
-            userId: generateUserId(name),
+            id: generateUserId(name),
             username: name,
             email: email,
             password: password,
@@ -198,9 +196,9 @@ export default function SignUp() {
             if (userSnapshot.exists()) {
               const userDetail = userSnapshot.data();
               cookies.set("auth-cookie", user.accessToken);
-              cookies.set("userId", userDetail.userId);
+              cookies.set("userId", userDetail.id);
               setIsAuth(true);
-              setUserId(userDetail.userId);
+              setUserId(userDetail.id);
               setAuthenticated(true);
               console.log("User authenticated.");
             } else {
@@ -216,7 +214,6 @@ export default function SignUp() {
           }
         }
       } else {
-        console.log("userList Email", userList.email);
         setEmailError(true);
         setEmailErrorMessage("Email Already Exists");
         console.error("User Already Exists");

@@ -15,8 +15,8 @@ export function formatDate(timestamp) {
 
 export function generateUserId(username) {
     let userId = username;
-    userId = userId.trim();
-    const remainingLength = 24 - username.length;
+    userId = userId.replace(/\s/g, "");
+    const remainingLength = 24 - userId.length;
     if (remainingLength > 0) {
       userId += uuidv4().replace(/-/g, '').slice(0, remainingLength);
     }

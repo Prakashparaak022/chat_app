@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   addDoc,
   serverTimestamp,
@@ -20,7 +20,8 @@ import {
   TextField,
   Typography,
   useMediaQuery,
-  Paper
+  Paper,
+  IconButton,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import Cookies from "universal-cookie";
@@ -33,7 +34,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { LottieAnimation } from "./LottieAnimation";
 import searchEmojiAnimation from "../Assets/own_lottie_Json/searching_emoji.json";
 import relaxedEmojiAnimation from "../Assets/own_lottie_Json/relaxed_emoji.json";
-import searchAnimation from "../Assets/own_lottie_Json/glass_search_left.json"
+import searchAnimation from "../Assets/own_lottie_Json/glass_search_left.json";
 import Element from "./Element";
 import ChatIcon from "@mui/icons-material/Chat";
 
@@ -45,222 +46,195 @@ import { validateRoomId, formatDate } from "../Utils/utils";
 export const Chat = () => {
   const [message, setMessage] = useState("");
   const [roomId, setRoomId] = useState("");
-  const [roomMessageList, setRoomMessageList] = useState([]);
   const [inBoxList, setInBoxList] = useState([]);
-  const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [allUserList, setAllUserList] = useState([]);
+  const [allRoomList, setAllRoomList] = useState([]);
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [manualRoomId, setManualRoomId] = useState("");
   const [manualRoomIdValue, setManualRoomIdValue] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [error, setError] = useState(false);
-  const [lastMessageList, setLastMessageList] = useState([]);
 
   const cookies = new Cookies();
   const navigate = useNavigate("/");
 
   const { setIsAuth, setUserId } = useAuth();
+  const containerRef = useRef(null);
 
   // const { setIsAuth } = props;
   // const { setUserId } = props;
-
-  const userId = cookies.get("userId");
   const msgCollection = collection(db, "Messages");
   const usersCollection = collection(db, "Users");
-  console.log("userId", userId);
+  const roomsCollection = collection(db, "Rooms");
+  const userId = useMemo(() => cookies.get("userId"), [cookies]);
 
   const isSmallScreen = useMediaQuery("(max-width:550px)");
 
-  const handleUserSelect = (user) => {
-    setSelectedUser(user);
-    setSearchTerm("");
-    setRoomId(user.roomId);
-    setRoomMessageList([]);
-    setManualRoomId("");
+  //All Users
+  const fetchAllUsers = async () => {
+    try {
+      const unsubscribe = onSnapshot(usersCollection, (snapShot) => {
+        const allUserData = [];
+        snapShot.forEach((doc) => {
+          allUserData.push({
+            ...doc.data(),
+            docId: doc.id,
+          });
+        });
+        setAllUserList(allUserData);
+      });
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching users: ", error);
+    }
   };
 
-  //All User
-  useEffect(() => {
-    const allUserListQuery = onSnapshot(usersCollection, (snapShot) => {
-      let allUserListTemp = [];
-      snapShot.forEach((doc) => {
-        allUserListTemp.push({ id: doc.id, ...doc.data() });
-      });
-      setAllUserList(allUserListTemp);
-    });
-
-    return () => allUserListQuery();
-  }, [usersCollection]);
-
-  // InBox List
-  useEffect(() => {
-    if (!userId) return;
-
-    const senderMsgQuery = query(
-      msgCollection,
-      where("userId", "==", userId),
-      orderBy("createdAt", "asc")
-    );
-    const recepientMsgQuery = query(
-      msgCollection,
-      where("recepientId", "==", userId),
-      orderBy("createdAt", "asc")
-    );
-
-    const senderMessages = [];
-    const fetchSenderMsg = onSnapshot(senderMsgQuery, (snapShot) => {
-      snapShot.forEach((doc) =>
-        senderMessages.push({ id: doc.id, ...doc.data() })
-      );
-      setInBoxList(senderMessages);
-    });
-
-    const recMessages = [];
-    const fetchRecepientMsg = onSnapshot(recepientMsgQuery, (snapShot) => {
-      snapShot.forEach((doc) => {
-        recMessages.push({ id: doc.id, ...doc.data() });
-      });
-      setInBoxList((prevMessages) => [...prevMessages, ...recMessages]);
-    });
-
-    return () => {
-      fetchSenderMsg();
-      fetchRecepientMsg();
-    };
-  }, [roomId, selectedUser, msgCollection, userId]);
-
-  // proper messsage
-  useEffect(() => {
-
-    if (!selectedUser && !manualRoomId) return;
-    let activeRoomId = roomId;
-
-    if (!inBoxList) {
-      setRoomId(uuidv4());
-    }
-
-    if (!roomId && selectedUser) {
-      const inBox = inBoxList.find(
-        (inBox) =>
-          inBox.userId === selectedUser.userId ||
-          inBox.recepientId === selectedUser.userId
-      );
-      activeRoomId = inBox ? inBox.roomId : uuidv4();
-      setRoomId(activeRoomId);
-    }
-
-    if (!currentUser && userId) {
-      const currentUserTemp = allUserList.find(
-        (user) => user.userId === userId
-      );
-      setCurrentUser(currentUserTemp);
-    }
-
-    if (roomId) {
-      const messageQuery = query(
-        msgCollection,
-        where("roomId", "==", roomId),
-        orderBy("createdAt", "asc")
-      );
-
-      const unsubscribe = onSnapshot(messageQuery, (snapShot) => {
-        const messageListTemp = [];
+  //All Rooms
+  const fetchAllRooms = async () => {
+    try {
+      const unsubscribe = onSnapshot(roomsCollection, (snapShot) => {
+        const roomData = [];
         snapShot.forEach((doc) => {
-          messageListTemp.push({ ...doc.data(), id: doc.id });
+          roomData.push({ ...doc.data(), docId: doc.id });
         });
-        setRoomMessageList(messageListTemp);
+        setAllRoomList(roomData);
       });
-
       return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching rooms: ", error);
     }
-  }, [roomId, selectedUser, allUserList, currentUser, inBoxList, manualRoomId, msgCollection, userId]);
+  };
 
-  //Searched Users
   useEffect(() => {
-    const searchedUsersTemp = allUserList.filter((user) => {
-      const username = user.username?.toLowerCase();
-      return username && username.includes(searchTerm.toLowerCase());
-    });
-    setSearchedUsers(searchedUsersTemp);
-  }, [searchTerm, allUserList]);
+    fetchAllUsers();
+    fetchAllRooms();
+  }, []);
 
-  // Filtered Users
-  const inBoxUsersList = [];
-  const inBoxUserIdList = [];
-  if (inBoxList) {
-    inBoxList.forEach((inBox) => {
-      const senderId = inBox.userId;
-      const recepientId = inBox.recepientId;
-      const loginUserId = userId;
-
-      if (!inBoxUserIdList.includes(senderId) && recepientId === loginUserId) {
-        inBoxUserIdList.push(senderId);
-      } else if (
-        !inBoxUserIdList.includes(recepientId) &&
-        senderId === loginUserId
-      ) {
-        inBoxUserIdList.push(recepientId);
-      }
-    });
-  }
-
-  if (inBoxUserIdList) {
-    allUserList.forEach((user) => {
-      const userId = user.userId;
-      if (inBoxUserIdList.includes(userId)) {
-        inBoxUsersList.push(user);
-      }
-    });
-  }
+  const currentUser = useMemo(() => {
+    if (allUserList && allUserList.length > 0)
+      return allUserList.find((user) => user.id == userId);
+  }, [allUserList]);
 
   const roomIdList = useMemo(() => {
     const roomIds = [];
-    inBoxList.forEach((inBox) => {
-      if (inBox.userId === userId || inBox.recepientId === userId) {
-        if (!roomIds.includes(inBox.roomId)) {
-          roomIds.push(inBox.roomId);
-        }
-      }
-    });
-    return roomIds;
-  }, [inBoxList, userId]);
-
-  useEffect(() => {
-    if (!roomIdList || roomIdList.length === 0) return;
-
-    const unsubscribeList = [];
-    roomIdList.forEach((roomId) => {
-
-      const messageQuery = query(
-        msgCollection,
-        where("roomId", "==", roomId),
-        orderBy("createdAt", "desc")
-      );
-
-      const unsubscribe = onSnapshot(messageQuery, (snapShot) => {
-        const lastMessageListTemp = [];
-        snapShot.forEach((doc) => {
-          lastMessageListTemp.push({ ...doc.data(), id: doc.id });
-        });
-
-        if (lastMessageListTemp.length > 0) {
-          setLastMessageList((prevState) => ({
-            ...prevState,
-            [roomId]: lastMessageListTemp[0],
-          }));
+    if (allRoomList && allRoomList.length > 0)
+      allRoomList.forEach((room) => {
+        if (room.userId === userId || room.contactUserId === userId) {
+          if (!roomIds.includes(room.id)) {
+            roomIds.push(room.id);
+          }
         }
       });
+    return roomIds;
+  }, [allRoomList, userId]);
 
-      unsubscribeList.push(unsubscribe);
+  //InBoxList
+  const fetchInboxMessage = async () => {
+    if (roomIdList && roomIdList.length > 0) {
+      try {
+        const roomQuery = query(
+          collection(db, "Messages"),
+          where("roomId", "in", roomIdList),
+          orderBy("createdAt", "asc")
+        );
+
+        const unsubscribe = onSnapshot(roomQuery, (snapShot) => {
+          const inBoxDataTemp = [];
+          snapShot.forEach((doc) => {
+            inBoxDataTemp.push({ ...doc.data(), docId: doc.id });
+          });
+          setInBoxList(inBoxDataTemp);
+        });
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error fetching InboxMessages: ", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchInboxMessage();
+  }, [roomIdList, roomId]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [inBoxList]);
+
+  const inBoxUsersList = useMemo(() => {
+    let inBoxUserListId = [];
+    allRoomList.forEach((room) => {
+      if (
+        room.userId === userId &&
+        !inBoxUserListId.includes(room.contactUserId)
+      ) {
+        inBoxUserListId.push(room.contactUserId);
+      } else if (
+        room.contactUserId === userId &&
+        !inBoxUserListId.includes(room.userId)
+      ) {
+        inBoxUserListId.push(room.userId);
+      }
     });
 
-    return () => {
-      unsubscribeList.forEach((unsubscribe) => unsubscribe());
-    };
-  }, [roomIdList, msgCollection]); // depend on roomIdList
+    let inBoxUserListTemp = [];
+    inBoxUserListId.forEach((inBoxuserId) => {
+      allUserList.filter((user) => {
+        if (user.id === inBoxuserId) {
+          inBoxUserListTemp.push(user);
+        }
+        return inBoxUserListTemp;
+      });
+    });
 
+    return inBoxUserListTemp;
+  }, [allRoomList, inBoxList]);
+
+  //Searched Users
+  const handleSearch = useCallback(
+    (username) => {
+      setSearchTerm(username);
+      const filteredUsers = allUserList.filter((user) => {
+        const usernameDB = user.username.toLowerCase();
+        return usernameDB.includes(username) && user.id != userId;
+      });
+      setSearchedUsers(filteredUsers);
+    },
+    [allUserList, searchedUsers]
+  );
+
+  // User Select
+  const handleRoomSelect = (user) => {
+    setSelectedUser(user);
+    setSearchTerm("");
+    setManualRoomId("");
+    inBoxUsersList.push(user);
+
+    if (user && user.id) {
+      const selectedUserId = user.id;
+      const selectedRoom = allRoomList.find((room) => {
+        return (
+          (room.userId === selectedUserId && room.contactUserId === userId) ||
+          (room.userId === userId && room.contactUserId === selectedUserId)
+        );
+      });
+
+      if (selectedRoom && selectedRoom != null) {
+        const selectedRoomId = selectedRoom.id;
+        const selectedInBoxList = inBoxList.filter(
+          (inBox) => inBox.roomId === selectedRoomId
+        );
+        setInBoxList(selectedInBoxList);
+        setRoomId(selectedRoomId);
+      } else {
+        setInBoxList("");
+        setRoomId("");
+      }
+    }
+  };
 
   const handleManualRoomIdSubmit = (input) => {
     const roomIdErrorMessage = validateRoomId(manualRoomIdValue);
@@ -272,7 +246,21 @@ export const Chat = () => {
       setSearchTerm("");
       setRoomId(input);
       setSelectedUser(null);
-      setRoomMessageList([]);
+      roomIdList.push(input);
+
+      fetchInboxMessage();
+
+      const selectedInBoxList = inBoxList.filter(
+        (inBox) => inBox.roomId == input
+      );
+
+      if (selectedInBoxList && selectedInBoxList.length > 0) {
+        const selectedRoom = selectedInBoxList[0];
+        if (selectedRoom && selectedRoom != null) {
+          setRoomId(selectedRoom.roomId);
+        }
+        setInBoxList(selectedInBoxList);
+      }
     } else {
       setError(true);
     }
@@ -280,19 +268,34 @@ export const Chat = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let activeRoomId = roomId || uuidv4();
 
-    if (message !== "" && roomId && (selectedUser || manualRoomId)) {
-      await addDoc(msgCollection, {
+    if (manualRoomId && inBoxList && inBoxList.length <= 0) {
+      activeRoomId = manualRoomId;
+    }
+
+    if (!roomId || roomId == "") {
+      await addDoc(roomsCollection, {
+        id: activeRoomId,
         userId: userId,
+        contactUserId: selectedUser?.id || "",
+        createdAt: serverTimestamp(),
+      });
+      roomIdList.push(activeRoomId);
+    }
+
+    if (message !== "" && (selectedUser || manualRoomId)) {
+      await addDoc(msgCollection, {
+        id: uuidv4(),
         senderId: userId,
-        recepientId: selectedUser?.userId || "",
-        roomId: roomId,
-        username: currentUser.username,
+        recepientId: selectedUser?.id || "",
+        roomId: activeRoomId,
         text: message,
         createdAt: serverTimestamp(),
       });
       setMessage("");
     }
+    setRoomId(activeRoomId);
   };
 
   const handleSignOut = async () => {
@@ -302,8 +305,16 @@ export const Chat = () => {
     cookies.remove("userId");
     setUserId("");
     setIsAuth(false);
-    navigate("/")
+    navigate("/");
   };
+
+  // console.log("AllUsers ", allUserList);
+  console.log("AllRooms ", allRoomList);
+  console.log("inBoxUsersList ", inBoxUsersList);
+  console.log("inBoxList ", inBoxList);
+  // console.log("userId ", userId);
+  console.log("manualRoomId ", manualRoomId);
+  console.log("inBoxList roomId Last", roomId);
 
   return (
     <>
@@ -361,8 +372,8 @@ export const Chat = () => {
                   <TextField
                     fullWidth
                     placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    // value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
                     sx={{
                       marginBottom: "10px",
                       borderRadius: "30px",
@@ -424,9 +435,9 @@ export const Chat = () => {
                     </Typography>
                   </Divider>
                   {/* Select Users */}
-                  {selectedUser && (
+                  {/* {selectedUser && (
                     <Paper
-                      key={selectedUser.userId}
+                      key={selectedUser.id}
                       onClick={() => handleUserSelect(selectedUser)}
                       elevation={3}
                       style={{
@@ -454,13 +465,14 @@ export const Chat = () => {
                         <span style={{ fontWeight: "bold" }}>
                           {selectedUser.username}
                         </span>
-                        {Object.values(lastMessageList)
+                        {inBoxList
                           .filter(
                             (message) =>
-                              (message?.userId === selectedUser.userId ||
-                                message?.recepientId === selectedUser.userId) &&
+                              (message?.senderId === selectedUser.id ||
+                                message?.recepientId === selectedUser.id) &&
                               message.recepientId !== "" // for filtering the roomId messages
                           )
+                          .slice(-1)
                           .map((message, index) => (
                             <div
                               key={index}
@@ -498,27 +510,24 @@ export const Chat = () => {
                           ))}
                       </div>
                     </Paper>
-                  )}
+                  )} */}
 
                   {(searchTerm ? searchedUsers : inBoxUsersList)
-                    // .filter((user) => user.userId !== currentUser?.userId)
-                    .filter((user) => user.userId !== selectedUser?.userId)
+                    // .filter((user) => user.id !== currentUser?.id)
+                    // .filter((user) => user.id !== selectedUser?.id) //Prevent Duplications
                     .map((user) => (
                       <Paper
-                        key={user.userId}
-                        onClick={() => handleUserSelect(user)}
+                        key={user.id}
+                        onClick={() => handleRoomSelect(user)}
                         elevation={3}
                         style={{
                           padding: "10px",
                           cursor: "pointer",
                           background:
-                            selectedUser?.userId === user.userId
+                            selectedUser?.id === user.id
                               ? "linear-gradient(-135deg, #69A9E9 25%, #3472F9 100%)"
                               : "#fff",
-                          color:
-                            selectedUser?.userId === user.userId
-                              ? "#fff"
-                              : "#000",
+                          color: selectedUser?.id === user.id ? "#fff" : "#000",
                           borderRadius: "10px",
                           marginBottom: "7px",
                           display: "flex",
@@ -538,54 +547,57 @@ export const Chat = () => {
                             {user.username}
                           </span>
 
-                          {Object.values(lastMessageList)
-                            .filter(
-                              (message) =>
-                                (message?.userId === user.userId ||
-                                  message?.recepientId === user.userId) &&
-                                message.recepientId !== ""
-                            )
-                            .map((message, index) => (
-                              <div
-                                key={index}
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  marginTop: "5px",
-                                }}>
-                                <span
+                          {/* Last Message */}
+                          {inBoxList &&
+                            inBoxList
+                              .filter(
+                                (message) =>
+                                  (message?.senderId === user.id ||
+                                    message?.recepientId === user.id) &&
+                                  message.recepientId !== ""
+                              )
+                              .slice(-1)
+                              .map((message, index) => (
+                                <div
+                                  key={index}
                                   style={{
-                                    fontSize: "13px",
-                                    flex: 1,
-                                    textAlign: "left",
-                                    color:
-                                      selectedUser?.userId === user.userId
-                                        ? "#fff"
-                                        : "#000",
-                                    overflow: "hidden",
-                                    width: "150px",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    width: "100%",
+                                    marginTop: "5px",
                                   }}>
-                                  {message?.text || "No message"}
-                                </span>
+                                  <span
+                                    style={{
+                                      fontSize: "13px",
+                                      flex: 1,
+                                      textAlign: "left",
+                                      color:
+                                        selectedUser?.id === user.id
+                                          ? "#fff"
+                                          : "#000",
+                                      overflow: "hidden",
+                                      width: "150px",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}>
+                                    {message?.text || "No message"}
+                                  </span>
 
-                                <span
-                                  style={{
-                                    fontSize: "10px",
-                                    textAlign: "right",
-                                    marginLeft: "10px",
-                                    color:
-                                      selectedUser?.userId === user.userId
-                                        ? "#fff"
-                                        : "#000",
-                                  }}>
-                                  {formatDate(message.createdAt)}
-                                </span>
-                              </div>
-                            ))}
+                                  <span
+                                    style={{
+                                      fontSize: "10px",
+                                      textAlign: "right",
+                                      marginLeft: "10px",
+                                      color:
+                                        selectedUser?.id === user.id
+                                          ? "#fff"
+                                          : "#000",
+                                    }}>
+                                    {formatDate(message.createdAt)}
+                                  </span>
+                                </div>
+                              ))}
                         </div>
                       </Paper>
                     ))}
@@ -627,8 +639,8 @@ export const Chat = () => {
                   <Button
                     sx={{ marginLeft: "-20px" }}
                     onClick={() => {
-                      setSelectedUser(null)
-                      setManualRoomId("")
+                      setSelectedUser(null);
+                      setManualRoomId("");
                     }}
                     startIcon={<ArrowBackIcon />}></Button>
                   {/* Image , selected User*/}
@@ -668,105 +680,108 @@ export const Chat = () => {
                 {!searchTerm ? (
                   selectedUser || manualRoomId ? (
                     <Container
+                      ref={containerRef}
                       sx={{ flexGrow: 1, overflowY: "auto", padding: "10px" }}
                       className="scrollBar">
-                      {roomMessageList.length > 0 ? (
-                        roomMessageList.map((msg, index) => {
-                          const user =
-                            allUserList.find(
-                              (user) => user.userId === msg.userId
-                            ) || {};
+                      {inBoxList || inBoxList.length > 0 ? (
+                        inBoxList
+                          .filter((inBox) => inBox.roomId === roomId)
+                          .map((msg, index) => {
+                            const user =
+                              allUserList.find(
+                                (user) => user.id === msg.senderId
+                              ) || {};
 
-                          return (
-                            <div
-                              key={index}
-                              style={{
-                                display: "flex",
-                                justifyContent:
-                                  user.userId === currentUser.userId
-                                    ? "flex-end"
-                                    : "flex-start",
-                                marginBottom: "10px",
-                              }}>
+                            return (
                               <div
+                                key={index}
                                 style={{
                                   display: "flex",
-                                  alignItems: "center",
-                                  flexDirection:
-                                    user.userId === currentUser.userId
-                                      ? "row-reverse"
-                                      : "row",
+                                  justifyContent:
+                                    user.id === currentUser.id
+                                      ? "flex-end"
+                                      : "flex-start",
+                                  marginBottom: "10px",
                                 }}>
-                                <Avatar
-                                  sx={{ boxShadow: "0px 2px 4px #00000057" }}
-                                  alt={
-                                    msg.userId === currentUser.userId
-                                      ? currentUser.username
-                                      : user.username
-                                  }
-                                  src={
-                                    msg.userId === currentUser.userId
-                                      ? currentUser.profileImg
-                                      : user.profileImg
-                                  }
-                                />
                                 <div
                                   style={{
                                     display: "flex",
-                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    flexDirection:
+                                      user.id === currentUser.id
+                                        ? "row-reverse"
+                                        : "row",
                                   }}>
-                                  <Paper
-                                    elevation={2}
-                                    sx={{
+                                  <Avatar
+                                    sx={{ boxShadow: "0px 2px 4px #00000057" }}
+                                    alt={
+                                      msg.senderId === currentUser.id
+                                        ? currentUser.username
+                                        : user.username
+                                    }
+                                    src={
+                                      msg.senderId === currentUser.id
+                                        ? currentUser.profileImg
+                                        : user.profileImg
+                                    }
+                                  />
+                                  <div
+                                    style={{
                                       display: "flex",
                                       flexDirection: "column",
-                                      borderRadius: `${
-                                        20 - msg.text.length * 0.15
-                                      }px`,
-                                      margin: "0px 5px",
-                                      marginTop: "10px",
-                                      minWidth: "40px",
-                                      background:
-                                        msg.userId === currentUser.userId
-                                          ? "linear-gradient(-135deg, #004dff 25%, #4968ff 100%)"
-                                          : "#fff",
-                                      color:
-                                        msg.userId === currentUser.userId
-                                          ? "#fff"
-                                          : "#000",
                                     }}>
+                                    <Paper
+                                      elevation={2}
+                                      sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        borderRadius: `${
+                                          20 - msg.text.length * 0.15
+                                        }px`,
+                                        margin: "0px 5px",
+                                        marginTop: "10px",
+                                        minWidth: "40px",
+                                        background:
+                                          msg.senderId === currentUser.id
+                                            ? "linear-gradient(-135deg, #004dff 25%, #4968ff 100%)"
+                                            : "#fff",
+                                        color:
+                                          msg.senderId === currentUser.id
+                                            ? "#fff"
+                                            : "#000",
+                                      }}>
+                                      <span
+                                        style={{
+                                          padding: "5px 15px",
+                                          textAlign: "justify",
+                                          fontWeight: "500",
+                                        }}>
+                                        {msg.text}
+                                      </span>
+                                    </Paper>
                                     <span
                                       style={{
-                                        padding: "5px 15px",
-                                        textAlign: "justify",
-                                        fontWeight: "500",
+                                        marginRight:
+                                          msg.senderId === currentUser.id
+                                            ? "10px"
+                                            : "0px",
+                                        marginLeft:
+                                          msg.senderId === currentUser.id
+                                            ? "0px"
+                                            : "12px",
+                                        textAlign:
+                                          msg.senderId === currentUser.id
+                                            ? "right"
+                                            : "left",
+                                        fontSize: "9px",
                                       }}>
-                                      {msg.text}
+                                      {formatDate(msg.createdAt)}
                                     </span>
-                                  </Paper>
-                                  <span
-                                    style={{
-                                      marginRight:
-                                        msg.userId === currentUser.userId
-                                          ? "10px"
-                                          : "0px",
-                                      marginLeft:
-                                        msg.userId === currentUser.userId
-                                          ? "0px"
-                                          : "12px",
-                                      textAlign:
-                                        msg.userId === currentUser.userId
-                                          ? "right"
-                                          : "left",
-                                      fontSize: "9px",
-                                    }}>
-                                    {formatDate(msg.createdAt)}
-                                  </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })
+                            );
+                          })
                       ) : (
                         <div
                           style={{
@@ -780,7 +795,7 @@ export const Chat = () => {
                           <div
                             style={{
                               width: "300px",
-                              height: "350px",
+                              height: "400px",
                               background:
                                 "linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))",
                               borderRadius: "20px",
@@ -805,12 +820,13 @@ export const Chat = () => {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        flexGrow: 1,
                       }}>
                       <div
                         style={{
                           width: "300px",
-                          height: "350px",
+                          height: "400px",
+                          display: "flex",
+                          flexDirection: "column",
                           background:
                             "linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))",
                           borderRadius: "20px",
@@ -822,10 +838,58 @@ export const Chat = () => {
                             chatLottieAnimation,
                             relaxedEmojiAnimation,
                           ]}
-                          animationText={
-                            " No messages here yet, send a message to start the chat!"
-                          }
                         />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "0",
+                            marginTop: "-30px",
+                          }}>
+                          {allUserList
+                            .slice(0, 3)
+                            .filter((user) => user.id !== userId)
+                            .map((user, index) => (
+                              <li
+                                key={index}
+                                style={{
+                                  listStyle: "none",
+                                  marginLeft: "-10px",
+                                }}>
+                                <IconButton
+                                  style={{ padding: "0" }}
+                                  onClick={() => handleRoomSelect(user)}>
+                                  <Avatar src={user.profileImg} />
+                                </IconButton>
+                              </li>
+                            ))}
+
+                          {allUserList.length > 3 && (
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginLeft: "-10px",
+                              }}>
+                              <Avatar>
+                                <span>...</span>
+                              </Avatar>
+                              <span>+{allUserList.length - 3} more</span>
+                            </li>
+                          )}
+                        </div>
+                        <p
+                          style={{
+                            textAlign: "center",
+                            color: "rgba(255, 215, 0, 1)",
+                            fontWeight: "bold",
+                            fontSize: "20px",
+                            textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
+                          }}>
+                          Select Users to Chat !
+                        </p>
                       </div>
                     </div>
                   )

@@ -4,13 +4,13 @@ import { getAuth, GoogleAuthProvider} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD9Ken0BJ-HtNTK-pzp7fgKkIdrtiyj0wM",
-  authDomain: "chatapp-d900e.firebaseapp.com",
-  projectId: "chatapp-d900e",
-  storageBucket: "chatapp-d900e.appspot.com",
-  messagingSenderId: "451012755899",
-  appId: "1:451012755899:web:c7df8b262a1f4f50c2049e",
-  measurementId: "G-B8GJNXLDV5"
+  apiKey: "AIzaSyDE1jFoP6Y8oDuSJJ8rIPSrQmWF5cWZVu0",
+  authDomain: "chatapp2-b7e83.firebaseapp.com",
+  projectId: "chatapp2-b7e83",
+  storageBucket: "chatapp2-b7e83.appspot.com",
+  messagingSenderId: "561252802739",
+  appId: "1:561252802739:web:0c3f999f842b2734b190c6",
+  measurementId: "G-D63TX6DZSY"
 };
 
 // Initialize Firebase
