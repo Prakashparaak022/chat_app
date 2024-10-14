@@ -269,7 +269,7 @@ export default function SignIn() {
           <Grid size={{ xs: 12, sm: 8, md: 6 }}>
             <Box
               sx={{
-                margin: { xs: "40px 40px", sm: "50px" },
+                margin: { xs: "90px 40px", sm: "50px" },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

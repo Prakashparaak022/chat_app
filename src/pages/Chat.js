@@ -47,6 +47,7 @@ export const Chat = () => {
   const [message, setMessage] = useState("");
   const [roomId, setRoomId] = useState("");
   const [inBoxList, setInBoxList] = useState([]);
+  const [roomMessageList, setRoomMessageList] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [allUserList, setAllUserList] = useState([]);
@@ -162,6 +163,10 @@ export const Chat = () => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
+    const filteredInbox = inBoxList.filter(
+      (inBox) => inBox.roomId === roomId
+    )
+    setRoomMessageList(filteredInbox);
   }, [inBoxList]);
 
   const inBoxUsersList = useMemo(() => {
@@ -207,11 +212,14 @@ export const Chat = () => {
   );
 
   // User Select
-  const handleRoomSelect = (user) => {
+  const handleUserSelect = (user) => {
     setSelectedUser(user);
     setSearchTerm("");
     setManualRoomId("");
-    inBoxUsersList.push(user);
+
+    if(user && !inBoxUsersList.includes(user)){
+      inBoxUsersList.push(user)
+    }
 
     if (user && user.id) {
       const selectedUserId = user.id;
@@ -227,10 +235,9 @@ export const Chat = () => {
         const selectedInBoxList = inBoxList.filter(
           (inBox) => inBox.roomId === selectedRoomId
         );
-        setInBoxList(selectedInBoxList);
+        setRoomMessageList(selectedInBoxList);
         setRoomId(selectedRoomId);
       } else {
-        setInBoxList("");
         setRoomId("");
       }
     }
@@ -248,8 +255,6 @@ export const Chat = () => {
       setSelectedUser(null);
       roomIdList.push(input);
 
-      fetchInboxMessage();
-
       const selectedInBoxList = inBoxList.filter(
         (inBox) => inBox.roomId == input
       );
@@ -259,7 +264,7 @@ export const Chat = () => {
         if (selectedRoom && selectedRoom != null) {
           setRoomId(selectedRoom.roomId);
         }
-        setInBoxList(selectedInBoxList);
+        setRoomMessageList(selectedInBoxList);
       }
     } else {
       setError(true);
@@ -314,7 +319,7 @@ export const Chat = () => {
   console.log("inBoxList ", inBoxList);
   // console.log("userId ", userId);
   console.log("manualRoomId ", manualRoomId);
-  console.log("inBoxList roomId Last", roomId);
+  console.log("roomMessageList", roomMessageList);
 
   return (
     <>
@@ -372,7 +377,7 @@ export const Chat = () => {
                   <TextField
                     fullWidth
                     placeholder="Search users..."
-                    // value={searchTerm}
+                    value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     sx={{
                       marginBottom: "10px",
@@ -518,7 +523,7 @@ export const Chat = () => {
                     .map((user) => (
                       <Paper
                         key={user.id}
-                        onClick={() => handleRoomSelect(user)}
+                        onClick={() => handleUserSelect(user)}
                         elevation={3}
                         style={{
                           padding: "10px",
@@ -683,8 +688,8 @@ export const Chat = () => {
                       ref={containerRef}
                       sx={{ flexGrow: 1, overflowY: "auto", padding: "10px" }}
                       className="scrollBar">
-                      {inBoxList || inBoxList.length > 0 ? (
-                        inBoxList
+                      {roomMessageList && roomMessageList.length > 0 ? (
+                        roomMessageList
                           .filter((inBox) => inBox.roomId === roomId)
                           .map((msg, index) => {
                             const user =
@@ -849,18 +854,18 @@ export const Chat = () => {
                           }}>
                           {allUserList
                             .slice(0, 3)
-                            .filter((user) => user.id !== userId)
-                            .map((user, index) => (
+                            .filter((user) => user.id !== currentUser.id)
+                            .map((user) => (
                               <li
-                                key={index}
+                              key={user.id}
                                 style={{
                                   listStyle: "none",
                                   marginLeft: "-10px",
                                 }}>
                                 <IconButton
-                                  style={{ padding: "0" }}
-                                  onClick={() => handleRoomSelect(user)}>
-                                  <Avatar src={user.profileImg} />
+                                  style={{ padding: "0",}}
+                                  onClick={() => handleUserSelect(user)}>
+                                  <Avatar src={user.profileImg}/>
                                 </IconButton>
                               </li>
                             ))}
@@ -873,7 +878,7 @@ export const Chat = () => {
                                 justifyContent: "center",
                                 marginLeft: "-10px",
                               }}>
-                              <Avatar>
+                              <Avatar sx={{background:"#8eb9fe"}} >
                                 <span>...</span>
                               </Avatar>
                               <span>+{allUserList.length - 3} more</span>
