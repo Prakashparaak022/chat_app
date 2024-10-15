@@ -89,6 +89,8 @@ export default function SignIn() {
             const userSnapshot = await getDoc(docUserRef);
             if (userSnapshot.exists()) {
               const userDetail = userSnapshot.data();
+              console.log("Created userId", userDetail.id);
+              
               cookies.set("auth-cookie", result.user.accessToken, cookieOptions);
               cookies.set("userId", userDetail.id);
               setUserId(userDetail.id);

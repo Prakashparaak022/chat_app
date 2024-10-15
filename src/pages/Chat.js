@@ -119,7 +119,7 @@ export const Chat = () => {
   const currentUser = useMemo(() => {
     if (allUserList && allUserList.length > 0)
       return allUserList.find((user) => user.id === userId);
-  }, [allUserList]);
+  }, [allUserList, userId]);
 
   const roomIdList = useMemo(() => {
     const roomIds = [];
@@ -546,7 +546,7 @@ export const Chat = () => {
                       </div>
                     </Paper>
                   ))}
-                  {inBoxList && inBoxList.length <= 0 && (
+                  {inBoxList && inBoxList.length <= 0 && inBoxUsersList.length <= 0 && (
                     <div
                       style={{
                         width: "100%",
@@ -583,51 +583,66 @@ export const Chat = () => {
                             relaxedEmojiAnimation,
                           ]}
                         />
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "0",
-                            marginTop: "-30px",
-                          }}>
-                          {allUserList
-                            .slice(0, 3)
-                            .filter(
-                              (user) =>
-                                user.id !== currentUser.id &&
-                                user.profileImg.length > 0
-                            )
-                            .map((user) => (
+                        {/* Small Devices */}
+                        {currentUser && allUserList.length > 0 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "0",
+                              marginTop: "-30px",
+                            }}>
+                            {allUserList
+                              .slice(0, 3)
+                              .filter(
+                                (user) =>
+                                  user.id !== currentUser.id
+                              )
+                              .map((user) => (
+                                <li
+                                  key={user.id}
+                                  style={{
+                                    listStyle: "none",
+                                    marginLeft: "-10px",
+                                  }}>
+                                  <IconButton
+                                    style={{ padding: "0" }}
+                                    onClick={() => handleUserSelect(user)}>
+                                    {user.profileImg ? (
+                                      <Avatar src={user.profileImg} />
+                                    ) : (
+                                      <Avatar
+                                        style={{
+                                          background: "#d63434",
+                                          color: "#fff",
+                                          fontWeight: "bold",
+                                        }}>
+                                        {user.username.charAt(0).toUpperCase()}
+                                      </Avatar>
+                                    )}
+                                  </IconButton>
+                                </li>
+                              ))}
+
+                            {/* Display remaining users if there are more than 3 */}
+                            {allUserList.length > 3 && (
                               <li
-                                key={user.id}
                                 style={{
-                                  listStyle: "none",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   marginLeft: "-10px",
                                 }}>
-                                <IconButton
-                                  style={{ padding: "0" }}
-                                  onClick={() => handleUserSelect(user)}>
-                                  <Avatar src={user.profileImg} />
-                                </IconButton>
+                                <Avatar sx={{ background: "#8eb9fe" }}>
+                                  <span>...</span>
+                                </Avatar>
+                                <span>+{allUserList.length - 3} more</span>
                               </li>
-                            ))}
+                            )}
+                          </div>
+                        )}
 
-                          {allUserList.length > 3 && (
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginLeft: "-10px",
-                              }}>
-                              <Avatar sx={{ background: "#8eb9fe" }}>
-                                <span>...</span>
-                              </Avatar>
-                              <span>+{allUserList.length - 3} more</span>
-                            </li>
-                          )}
-                        </div>
                         <p
                           className="headerFont"
                           style={{
@@ -714,18 +729,18 @@ export const Chat = () => {
                         style={{
                           width: "60%",
                         }}>
-                        <img
-                          src={
-                            currentUser.profileImg ||
-                            currentUser.username.charAt(0).toUpperCase()
-                          }
-                          style={{
-                            border: "3px solid white",
-                            bgcolor: "#f0f0f0",
-                            borderRadius: "50%",
-                            width: "60%",
-                          }}
-                        />
+                        {currentUser.profileImg ? (
+                          <Avatar src={currentUser.profileImg} />
+                        ) : (
+                          <Avatar
+                            style={{
+                              background: "#d63434",
+                              color: "#fff",
+                              fontWeight: "bold",
+                            }}>
+                            {currentUser.username.charAt(0).toUpperCase()}
+                          </Avatar>
+                        )}
                       </IconButton>
 
                       <Menu
@@ -925,51 +940,64 @@ export const Chat = () => {
                             relaxedEmojiAnimation,
                           ]}
                         />
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "0",
-                            marginTop: "-30px",
-                          }}>
-                          {allUserList
-                            .slice(0, 3)
-                            .filter(
-                              (user) =>
-                                user.id !== currentUser.id &&
-                                user.profileImg.length > 0
-                            )
-                            .map((user) => (
+
+                        {currentUser && allUserList.length > 0 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "0",
+                              marginTop: "-30px",
+                            }}>
+                            {allUserList
+                              .slice(0, 3)
+                              .filter(
+                                (user) =>
+                                  user.id !== currentUser.id 
+                              )
+                              .map((user) => (
+                                <li
+                                  key={user.id}
+                                  style={{
+                                    listStyle: "none",
+                                    marginLeft: "-10px",
+                                  }}>
+                                  <IconButton
+                                    style={{ padding: "0" }}
+                                    onClick={() => handleUserSelect(user)}>
+                                    {user.profileImg ? (
+                                      <Avatar src={user.profileImg} />
+                                    ) : (
+                                      <Avatar
+                                        style={{
+                                          background: "#d63434",
+                                          color: "#fff",
+                                          fontWeight: "bold",
+                                        }}>
+                                        {user.username.charAt(0).toUpperCase()}
+                                      </Avatar>
+                                    )}
+                                  </IconButton>
+                                </li>
+                              ))}
+
+                            {allUserList.length > 3 && (
                               <li
-                                key={user.id}
                                 style={{
-                                  listStyle: "none",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   marginLeft: "-10px",
                                 }}>
-                                <IconButton
-                                  style={{ padding: "0" }}
-                                  onClick={() => handleUserSelect(user)}>
-                                  <Avatar src={user.profileImg} />
-                                </IconButton>
+                                <Avatar sx={{ background: "#8eb9fe" }}>
+                                  <span>...</span>
+                                </Avatar>
+                                <span>+{allUserList.length - 3} more</span>
                               </li>
-                            ))}
-
-                          {allUserList.length > 3 && (
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginLeft: "-10px",
-                              }}>
-                              <Avatar sx={{ background: "#8eb9fe" }}>
-                                <span>...</span>
-                              </Avatar>
-                              <span>+{allUserList.length - 3} more</span>
-                            </li>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
                         <p
                           className="headerFont"
                           style={{
