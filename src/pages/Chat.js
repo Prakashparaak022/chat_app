@@ -324,7 +324,7 @@ export const Chat = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
+  
   return (
     <>
       <Container
