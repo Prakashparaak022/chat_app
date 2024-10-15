@@ -56,8 +56,6 @@ export default function SignUp() {
   const navigate = useNavigate();
 
   const { setIsAuth, setUserId } = useAuth();
-  // const { setIsAuth } = props;
-  // const { setUserId } = props;
 
   const userCollection = collection(db, "Users");
 

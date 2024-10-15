@@ -562,7 +562,7 @@ export const Chat = () => {
                       <div
                         style={{
                           width: "250px",
-                          height: "350px",
+                          height: "370px",
 
                           display:
                             (isSmallScreen && (selectedUser || manualRoomId)) ||
@@ -636,8 +636,9 @@ export const Chat = () => {
                             fontWeight: "bold",
                             fontSize: "20px",
                             textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
+                            textTransform: "uppercase",
                           }}>
-                          Select Users to Chat !
+                          Find & Chat with Users Now!
                         </p>
                       </div>
                     </div>
@@ -702,7 +703,12 @@ export const Chat = () => {
                   </h2>
 
                   {currentUser && (
-                    <Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}>
                       <IconButton
                         onClick={handleMenuOpen}
                         style={{
@@ -904,7 +910,7 @@ export const Chat = () => {
                       <div
                         style={{
                           width: "300px",
-                          height: "400px",
+                          height: "420px",
                           display: "flex",
                           flexDirection: "column",
                           background:
@@ -972,8 +978,9 @@ export const Chat = () => {
                             fontWeight: "bold",
                             fontSize: "20px",
                             textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
+                            textTransform: "uppercase",
                           }}>
-                          Select Users to Chat !
+                          Find & Chat with Users Now!
                         </p>
                       </div>
                     </div>

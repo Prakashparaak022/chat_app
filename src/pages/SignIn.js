@@ -48,9 +48,6 @@ export default function SignIn() {
   const navigate = useNavigate();
   const { setIsAuth, setUserId } = useAuth();
 
-  // const { setIsAuth } = props;
-  // const { setUserId } = props;
-
   const userCollection = collection(db, "Users");
 
   const signInWithGoogle = async () => {
