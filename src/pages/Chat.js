@@ -69,7 +69,7 @@ export const Chat = () => {
   const msgCollection = collection(db, "Messages");
   const usersCollection = collection(db, "Users");
   const roomsCollection = collection(db, "Rooms");
-  const userId = useMemo(() => cookies.get("userId"), [cookies]);
+  const userId = useMemo(() => cookies.get("userId"), []);
 
   const isSmallScreen = useMediaQuery("(max-width:550px)");
 
@@ -115,7 +115,7 @@ export const Chat = () => {
 
   const currentUser = useMemo(() => {
     if (allUserList && allUserList.length > 0)
-      return allUserList.find((user) => user.id == userId);
+      return allUserList.find((user) => user.id === userId);
   }, [allUserList]);
 
   const roomIdList = useMemo(() => {
@@ -202,7 +202,7 @@ export const Chat = () => {
       setSearchTerm(username);
       const filteredUsers = allUserList.filter((user) => {
         const usernameDB = user.username.toLowerCase();
-        return usernameDB.includes(username.toLowerCase()) && user.id != userId;
+        return usernameDB.includes(username.toLowerCase()) && user.id !== userId;
       });
       setSearchedUsers(filteredUsers);
     },
@@ -254,7 +254,7 @@ export const Chat = () => {
       roomIdList.push(input);
 
       const selectedInBoxList = inBoxList.filter(
-        (inBox) => inBox.roomId == input
+        (inBox) => inBox.roomId === input
       );
 
       if (selectedInBoxList && selectedInBoxList.length > 0) {
@@ -277,7 +277,7 @@ export const Chat = () => {
       activeRoomId = manualRoomId;
     }
 
-    if (!roomId || roomId == "") {
+    if (!roomId || roomId === "") {
       await addDoc(roomsCollection, {
         id: activeRoomId,
         userId: userId,
