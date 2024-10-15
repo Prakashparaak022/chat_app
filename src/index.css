@@ -3,7 +3,7 @@
 
 body {
   margin: 0;
-  font-family: 'Poppins', sans-serif !important;
+  /* font-family: 'Poppins', sans-serif !important; */
 
 }
 
@@ -12,6 +12,6 @@ code {
     monospace;
 }
 
-/* .headerFont{
-  font-family: 'Josefin Sans', sans-serif !important;
-} */
+.headerFont{
+  font-family: 'Poppins', sans-serif !important;
+} 

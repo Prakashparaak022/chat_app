@@ -23,6 +23,7 @@ import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import {
+  cookieOptions,
   generateUserId,
   validateEmail,
   validateName,
@@ -92,7 +93,7 @@ export default function SignUp() {
             const userSnapshot = await getDoc(docUserRef);
             if (userSnapshot.exists()) {
               const userDetail = userSnapshot.data();
-              cookies.set("auth-cookie", result.user.accessToken);
+              cookies.set("auth-cookie", result.user.accessToken, cookieOptions);
               cookies.set("userId", userDetail.id);
               setUserId(userDetail.id);
               setIsAuth(true);
@@ -104,7 +105,7 @@ export default function SignUp() {
         } else {
           console.log("Existing User ");
           const userDetail = userList[0];
-          cookies.set("auth-cookie", result.user.accessToken);
+          cookies.set("auth-cookie", result.user.accessToken, cookieOptions);
           cookies.set("userId", userDetail.id);
           setUserId(userDetail.id);
           setIsAuth(true);
@@ -195,7 +196,7 @@ export default function SignUp() {
             const userSnapshot = await getDoc(docUserRef);
             if (userSnapshot.exists()) {
               const userDetail = userSnapshot.data();
-              cookies.set("auth-cookie", user.accessToken);
+              cookies.set("auth-cookie", user.accessToken, cookieOptions);
               cookies.set("userId", userDetail.id);
               setIsAuth(true);
               setUserId(userDetail.id);

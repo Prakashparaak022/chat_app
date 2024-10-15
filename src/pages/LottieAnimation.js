@@ -32,6 +32,7 @@ export const LottieAnimation = (props) => {
         />
       </Box>
       <p
+        className="headerFont"
         style={{
           textAlign: "center",
           marginTop: "-10px",

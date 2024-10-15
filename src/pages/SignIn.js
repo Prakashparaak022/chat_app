@@ -21,7 +21,7 @@ import {
 import { auth, db, provider } from "../firebaseConfig";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import Cookies from "universal-cookie";
-import { generateUserId } from "../Utils/utils";
+import { cookieOptions, generateUserId } from "../Utils/utils";
 import { Avatar, Grid2 as Grid, Paper, useTheme } from "@mui/material";
 import { LottieAnimation } from "./LottieAnimation";
 import { validateEmail } from "../Utils/utils";
@@ -72,7 +72,7 @@ export default function SignIn() {
 
         if (userList.length > 0) {
           const userDetail = userList[0];
-          cookies.set("auth-cookie", result.user.accessToken);
+          cookies.set("auth-cookie", result.user.accessToken, cookieOptions);
           cookies.set("userId", userDetail.id);
           setUserId(userDetail.id);
           setIsAuth(true);
@@ -92,7 +92,7 @@ export default function SignIn() {
             const userSnapshot = await getDoc(docUserRef);
             if (userSnapshot.exists()) {
               const userDetail = userSnapshot.data();
-              cookies.set("auth-cookie", result.user.accessToken);
+              cookies.set("auth-cookie", result.user.accessToken, cookieOptions);
               cookies.set("userId", userDetail.id);
               setUserId(userDetail.id);
               setIsAuth(true);
@@ -141,23 +141,24 @@ export default function SignIn() {
             userPassword === password &&
             userPassword.length > 0
           ) {
+            
             // const userCredential = await createUserWithEmailAndPassword(
             //   auth,
             //   email,
             //   password
             // );
             // const user = userCredential.user;
-
-            cookies.set("auth-cookie", userDetail.id);
+            
+            cookies.set("auth-cookie", userDetail.id, cookieOptions);
             cookies.set("userId", userDetail.id);
             setIsAuth(true);
             setUserId(userDetail.id);
             setAuthenticated(true);
             console.log("User authenticated.");
           } else {
-            setEmailError(false);
+            setEmailError(true);
             setEmailErrorMessage("Credential Doesn't Match");
-            setPasswordError(false);
+            setPasswordError(true);
             setPasswordErrorMessage("Credential Doesn't Match");
             console.error("Credentials don't match.");
           }
@@ -165,7 +166,7 @@ export default function SignIn() {
           console.error("Error signing in: ", error);
         }
       } else {
-        setEmailError(false);
+        setEmailError(true);
         setEmailErrorMessage("Email Doesn't Exist");
         console.error("User Does Not Exist.");
       }
