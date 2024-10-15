@@ -168,7 +168,7 @@ export const Chat = () => {
     }
     const filteredInbox = inBoxList.filter((inBox) => inBox.roomId === roomId);
     setRoomMessageList(filteredInbox);
-  }, [inBoxList]);
+  }, [roomMessageList]);
 
   const inBoxUsersList = useMemo(() => {
     let inBoxUserListId = [];
@@ -324,7 +324,7 @@ export const Chat = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-  
+
   return (
     <>
       <Container
@@ -546,118 +546,120 @@ export const Chat = () => {
                       </div>
                     </Paper>
                   ))}
-                  {inBoxList && inBoxList.length <= 0 && inBoxUsersList.length <= 0 && (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        display:
-                          (isSmallScreen && (selectedUser || manualRoomId)) ||
-                          !isSmallScreen
-                            ? "none"
-                            : "flex",
-                      }}>
+                  {inBoxList &&
+                    inBoxList.length <= 0 &&
+                    inBoxUsersList.length <= 0 && (
                       <div
                         style={{
-                          width: "250px",
-                          height: "370px",
-
+                          width: "100%",
+                          height: "100%",
+                          justifyContent: "center",
+                          alignItems: "center",
                           display:
                             (isSmallScreen && (selectedUser || manualRoomId)) ||
                             !isSmallScreen
                               ? "none"
                               : "flex",
-                          flexDirection: "column",
-                          background:
-                            "linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))",
-                          borderRadius: "20px",
-                          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.5)",
-                          marginTop: "5rem",
                         }}>
-                        {/* Select User or Enter ROom Id */}
-                        <LottieAnimation
-                          animationList={[
-                            chatLottieAnimation,
-                            relaxedEmojiAnimation,
-                          ]}
-                        />
-                        {/* Small Devices */}
-                        {currentUser && allUserList.length > 0 && (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              padding: "0",
-                              marginTop: "-30px",
-                            }}>
-                            {allUserList
-                              .slice(0, 3)
-                              .filter(
-                                (user) =>
-                                  user.id !== currentUser.id
-                              )
-                              .map((user) => (
+                        <div
+                          style={{
+                            width: "250px",
+                            height: "370px",
+
+                            display:
+                              (isSmallScreen &&
+                                (selectedUser || manualRoomId)) ||
+                              !isSmallScreen
+                                ? "none"
+                                : "flex",
+                            flexDirection: "column",
+                            background:
+                              "linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))",
+                            borderRadius: "20px",
+                            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.5)",
+                            marginTop: "5rem",
+                          }}>
+                          {/* Select User or Enter ROom Id */}
+                          <LottieAnimation
+                            animationList={[
+                              chatLottieAnimation,
+                              relaxedEmojiAnimation,
+                            ]}
+                          />
+                          {/* Small Devices */}
+                          {currentUser && allUserList.length > 0 && (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "0",
+                                marginTop: "-30px",
+                              }}>
+                              {allUserList
+                                .slice(0, 3)
+                                .filter((user) => user.id !== currentUser.id)
+                                .map((user) => (
+                                  <li
+                                    key={user.id}
+                                    style={{
+                                      listStyle: "none",
+                                      marginLeft: "-10px",
+                                    }}>
+                                    <IconButton
+                                      style={{ padding: "0" }}
+                                      onClick={() => handleUserSelect(user)}>
+                                      {user.profileImg ? (
+                                        <Avatar src={user.profileImg} />
+                                      ) : (
+                                        <Avatar
+                                          style={{
+                                            background: "#d63434",
+                                            color: "#fff",
+                                            fontWeight: "bold",
+                                          }}>
+                                          {user.username
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                        </Avatar>
+                                      )}
+                                    </IconButton>
+                                  </li>
+                                ))}
+
+                              {/* Display remaining users if there are more than 3 */}
+                              {allUserList.length > 3 && (
                                 <li
-                                  key={user.id}
                                   style={{
-                                    listStyle: "none",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                     marginLeft: "-10px",
                                   }}>
-                                  <IconButton
-                                    style={{ padding: "0" }}
-                                    onClick={() => handleUserSelect(user)}>
-                                    {user.profileImg ? (
-                                      <Avatar src={user.profileImg} />
-                                    ) : (
-                                      <Avatar
-                                        style={{
-                                          background: "#d63434",
-                                          color: "#fff",
-                                          fontWeight: "bold",
-                                        }}>
-                                        {user.username.charAt(0).toUpperCase()}
-                                      </Avatar>
-                                    )}
-                                  </IconButton>
+                                  <Avatar sx={{ background: "#8eb9fe" }}>
+                                    <span>...</span>
+                                  </Avatar>
+                                  <span>+{allUserList.length - 3} more</span>
                                 </li>
-                              ))}
+                              )}
+                            </div>
+                          )}
 
-                            {/* Display remaining users if there are more than 3 */}
-                            {allUserList.length > 3 && (
-                              <li
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  marginLeft: "-10px",
-                                }}>
-                                <Avatar sx={{ background: "#8eb9fe" }}>
-                                  <span>...</span>
-                                </Avatar>
-                                <span>+{allUserList.length - 3} more</span>
-                              </li>
-                            )}
-                          </div>
-                        )}
-
-                        <p
-                          className="headerFont"
-                          style={{
-                            textAlign: "center",
-                            color: "rgba(255, 215, 0, 1)",
-                            fontWeight: "bold",
-                            fontSize: "20px",
-                            textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
-                            textTransform: "uppercase",
-                          }}>
-                          Find & Chat with Users Now!
-                        </p>
+                          <p
+                            className="headerFont"
+                            style={{
+                              textAlign: "center",
+                              color: "rgba(255, 215, 0, 1)",
+                              fontWeight: "bold",
+                              fontSize: "20px",
+                              textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
+                              textTransform: "uppercase",
+                            }}>
+                            Find & Chat with Users Now!
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </Paper>
             </Grid>
@@ -952,10 +954,7 @@ export const Chat = () => {
                             }}>
                             {allUserList
                               .slice(0, 3)
-                              .filter(
-                                (user) =>
-                                  user.id !== currentUser.id 
-                              )
+                              .filter((user) => user.id !== currentUser.id)
                               .map((user) => (
                                 <li
                                   key={user.id}
