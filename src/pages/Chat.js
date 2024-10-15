@@ -22,6 +22,9 @@ import {
   useMediaQuery,
   Paper,
   IconButton,
+  Tooltip,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import Cookies from "universal-cookie";
@@ -37,6 +40,7 @@ import relaxedEmojiAnimation from "../Assets/own_lottie_Json/relaxed_emoji.json"
 import searchAnimation from "../Assets/own_lottie_Json/glass_search_left.json";
 import Element from "./Element";
 import ChatIcon from "@mui/icons-material/Chat";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import chatLottieAnimation from "../Assets/Lotties/chat_lottie.json";
 import { useAuth } from "../AuthProvider";
@@ -57,6 +61,7 @@ export const Chat = () => {
   const [manualRoomIdValue, setManualRoomIdValue] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [error, setError] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const cookies = new Cookies();
   const navigate = useNavigate("/");
@@ -64,8 +69,6 @@ export const Chat = () => {
   const { setIsAuth, setUserId } = useAuth();
   const containerRef = useRef(null);
 
-  // const { setIsAuth } = props;
-  // const { setUserId } = props;
   const msgCollection = collection(db, "Messages");
   const usersCollection = collection(db, "Users");
   const roomsCollection = collection(db, "Rooms");
@@ -202,7 +205,9 @@ export const Chat = () => {
       setSearchTerm(username);
       const filteredUsers = allUserList.filter((user) => {
         const usernameDB = user.username.toLowerCase();
-        return usernameDB.includes(username.toLowerCase()) && user.id !== userId;
+        return (
+          usernameDB.includes(username.toLowerCase()) && user.id !== userId
+        );
       });
       setSearchedUsers(filteredUsers);
     },
@@ -309,15 +314,16 @@ export const Chat = () => {
     setUserId("");
     setIsAuth(false);
     navigate("/");
+    handleMenuClose();
   };
 
-  // console.log("AllUsers ", allUserList);
-  console.log("AllRooms ", allRoomList);
-  console.log("inBoxUsersList ", inBoxUsersList);
-  console.log("inBoxList ", inBoxList);
-  // console.log("userId ", userId);
-  console.log("manualRoomId ", manualRoomId);
-  console.log("roomMessageList", roomMessageList);
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <>
@@ -415,6 +421,18 @@ export const Chat = () => {
                         textAlign: "center",
                         background: "#ffffff76",
                       },
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip
+                            title="Share this Room ID with other users. If they enter the same Room ID, you both will be able to join the same chat room."
+                            placement="top">
+                            <InfoOutlinedIcon
+                              color="primary"
+                              sx={{ cursor: "pointer" }}
+                            />
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
                     }}
                     variant="outlined"
                   />
@@ -528,101 +546,101 @@ export const Chat = () => {
                       </div>
                     </Paper>
                   ))}
-                  {inBoxList && inBoxList.length <= 0 &&(
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      display:
-                        (isSmallScreen && (selectedUser || manualRoomId)) ||
-                        !isSmallScreen
-                          ? "none"
-                          : "flex",
-                    }}>
+                  {inBoxList && inBoxList.length <= 0 && (
                     <div
                       style={{
-                        width: "250px",
-                        height: "350px",
-                        
-                      display:
-                      (isSmallScreen && (selectedUser || manualRoomId)) ||
-                      !isSmallScreen
-                        ? "none"
-                        : "flex",
-                        flexDirection: "column",
-                        background:
-                          "linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))",
-                        borderRadius: "20px",
-                        boxShadow: "0 8px 20px rgba(0, 0, 0, 0.5)",
-                        marginTop:"5rem"
+                        width: "100%",
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        display:
+                          (isSmallScreen && (selectedUser || manualRoomId)) ||
+                          !isSmallScreen
+                            ? "none"
+                            : "flex",
                       }}>
-                      {/* Select User or Enter ROom Id */}
-                      <LottieAnimation
-                        animationList={[
-                          chatLottieAnimation,
-                          relaxedEmojiAnimation,
-                        ]}
-                      />
                       <div
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          padding: "0",
-                          marginTop: "-30px",
+                          width: "250px",
+                          height: "350px",
+
+                          display:
+                            (isSmallScreen && (selectedUser || manualRoomId)) ||
+                            !isSmallScreen
+                              ? "none"
+                              : "flex",
+                          flexDirection: "column",
+                          background:
+                            "linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))",
+                          borderRadius: "20px",
+                          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.5)",
+                          marginTop: "5rem",
                         }}>
-                        {allUserList
-                          .slice(0, 3)
-                          .filter(
-                            (user) =>
-                              user.id !== currentUser.id &&
-                              user.profileImg.length > 0
-                          )
-                          .map((user) => (
+                        {/* Select User or Enter ROom Id */}
+                        <LottieAnimation
+                          animationList={[
+                            chatLottieAnimation,
+                            relaxedEmojiAnimation,
+                          ]}
+                        />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "0",
+                            marginTop: "-30px",
+                          }}>
+                          {allUserList
+                            .slice(0, 3)
+                            .filter(
+                              (user) =>
+                                user.id !== currentUser.id &&
+                                user.profileImg.length > 0
+                            )
+                            .map((user) => (
+                              <li
+                                key={user.id}
+                                style={{
+                                  listStyle: "none",
+                                  marginLeft: "-10px",
+                                }}>
+                                <IconButton
+                                  style={{ padding: "0" }}
+                                  onClick={() => handleUserSelect(user)}>
+                                  <Avatar src={user.profileImg} />
+                                </IconButton>
+                              </li>
+                            ))}
+
+                          {allUserList.length > 3 && (
                             <li
-                              key={user.id}
                               style={{
-                                listStyle: "none",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
                                 marginLeft: "-10px",
                               }}>
-                              <IconButton
-                                style={{ padding: "0" }}
-                                onClick={() => handleUserSelect(user)}>
-                                <Avatar src={user.profileImg} />
-                              </IconButton>
+                              <Avatar sx={{ background: "#8eb9fe" }}>
+                                <span>...</span>
+                              </Avatar>
+                              <span>+{allUserList.length - 3} more</span>
                             </li>
-                          ))}
-
-                        {allUserList.length > 3 && (
-                          <li
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginLeft: "-10px",
-                            }}>
-                            <Avatar sx={{ background: "#8eb9fe" }}>
-                              <span>...</span>
-                            </Avatar>
-                            <span>+{allUserList.length - 3} more</span>
-                          </li>
-                        )}
+                          )}
+                        </div>
+                        <p
+                          className="headerFont"
+                          style={{
+                            textAlign: "center",
+                            color: "rgba(255, 215, 0, 1)",
+                            fontWeight: "bold",
+                            fontSize: "20px",
+                            textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
+                          }}>
+                          Select Users to Chat !
+                        </p>
                       </div>
-                      <p
-                        className="headerFont"
-                        style={{
-                          textAlign: "center",
-                          color: "rgba(255, 215, 0, 1)",
-                          fontWeight: "bold",
-                          fontSize: "20px",
-                          textShadow: "2px 1.2px 2px rgba(255, 0, 0, 1)",
-                        }}>
-                        Select Users to Chat !
-                      </p>
                     </div>
-                  </div>
                   )}
                 </div>
               </Paper>
@@ -683,19 +701,58 @@ export const Chat = () => {
                       : "Select a user to chat"}
                   </h2>
 
-                  {/* Sign Out Button */}
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#ff4d4d",
-                      color: "#fff",
-                    }}
-                    onClick={handleSignOut}>
-                    {isSmallScreen ? (
-                      <ExitToAppIcon sx={{ width: 23, height: 23 }} />
-                    ) : null}
-                    {!isSmallScreen && "Sign Out"}
-                  </Button>
+                  {currentUser && (
+                    <Box>
+                      <IconButton
+                        onClick={handleMenuOpen}
+                        style={{
+                          width: "60%",
+                        }}>
+                        <img
+                          src={
+                            currentUser.profileImg ||
+                            currentUser.username.charAt(0).toUpperCase()
+                          }
+                          style={{
+                            border: "3px solid white",
+                            bgcolor: "#f0f0f0",
+                            borderRadius: "50%",
+                            width: "60%",
+                          }}
+                        />
+                      </IconButton>
+
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "right",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}>
+                        <MenuItem>
+                          <Avatar
+                            sx={{ display: "flex", justifyContent: "center" }}
+                            src={
+                              currentUser.profileImg ||
+                              currentUser.username.charAt(0).toUpperCase()
+                            }
+                          />
+                        </MenuItem>
+                        <MenuItem>{currentUser.username}</MenuItem>
+                        <MenuItem>{currentUser.email}</MenuItem>
+                        <Divider />
+                        <MenuItem onClick={handleSignOut}>
+                          Logout{" "}
+                          <ExitToAppIcon sx={{ width: 20, height: 20 }} />
+                        </MenuItem>
+                      </Menu>
+                    </Box>
+                  )}
                 </Box>
 
                 {/* Chat Box */}

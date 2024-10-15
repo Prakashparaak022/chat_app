@@ -42,7 +42,7 @@
 
 .box4 {
   position: absolute;
-  top: 40%;
+  top: 80%;
   right: 5%;
   width: 10px;
   height: 10px;
@@ -86,6 +86,18 @@
   border-radius: 50%;
   animation: box-shape linear 5s infinite;
   background-color: transparent;
+}
+.circle4 {
+  position: absolute;
+  font-size: 0.2rem;
+  top: 25%;
+  right: 10%;
+  width: 10px;
+  height: 10px;
+  background-color: transparent;
+  border: 3px solid #f26d20;
+  border-radius: 50%;
+  animation: box-shape linear 5s infinite;
 }
 .dot1 {
   position: absolute;
@@ -152,7 +164,7 @@
 .obj3 {
   font-size: 1.1rem;
   position: absolute;
-  top: 30%;
+  top: 40%;
   right: 50%;
   color: #f22020;
   transform: rotate(35deg);
@@ -161,7 +173,7 @@
 .obj4 {
   font-size: 1.1rem;
   position: absolute;
-  top: 80%;
+  top: 50%;
   right: 6%;
   color: #20b6f2;
   transform: rotate(360deg);
