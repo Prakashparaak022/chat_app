@@ -285,7 +285,6 @@ export const Chat = () => {
       activeRoomId = manualRoomId;
     }
 
-    
     setMessage("");
     if (!roomId || roomId === "") {
       await addDoc(roomsCollection, {
@@ -462,94 +461,108 @@ export const Chat = () => {
                       All Chats
                     </Typography>
                   </Divider>
-                  {(searchTerm ? searchedUsers : inBoxUsersList).map((user) => (
-                    <Paper
-                      key={user.id}
-                      onClick={() => handleUserSelect(user)}
-                      elevation={3}
-                      style={{
-                        padding: "10px",
-                        cursor: "pointer",
-                        background:
-                          selectedUser?.id === user.id
-                            ? "linear-gradient(-135deg, #69A9E9 25%, #3472F9 100%)"
-                            : "#fff",
-                        color: selectedUser?.id === user.id ? "#fff" : "#000",
-                        borderRadius: "10px",
-                        marginBottom: "7px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "1rem",
-                        overflow: "hidden",
-                      }}>
-                      <Avatar alt={user.username} src={user.profileImg} />
+                  <div
+                  className="scrollBar"
+                    style={{
+                      maxHeight: "450px",
+                      width:"100%",
+                      overflowY: "auto",
+                      overflowX: "hidden", // Hide horizontal scrolling
+                      padding: "5px"
+                    }}>
+                    {(searchTerm ? searchedUsers : inBoxUsersList).map(
+                      (user) => (
+                        <Paper
+                          key={user.id}
+                          onClick={() => handleUserSelect(user)}
+                          elevation={3}
+                          className="scrollBar"
+                          style={{
+                            padding: "10px",
+                            cursor: "pointer",
+                            background:
+                              selectedUser?.id === user.id
+                                ? "linear-gradient(-135deg, #69A9E9 25%, #3472F9 100%)"
+                                : "#fff",
+                            color:
+                              selectedUser?.id === user.id ? "#fff" : "#000",
+                            borderRadius: "10px",
+                            marginBottom: "7px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "1rem",
+                            overflow: "hidden"
+                          }}>
+                          <Avatar alt={user.username} src={user.profileImg} />
 
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          width: "100%",
-                        }}>
-                        <span
-                          style={{ fontWeight: "bold" }}
-                          className="headerFont">
-                          {user.username}
-                        </span>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              width: "100%",
+                            }}>
+                            <span
+                              style={{ fontWeight: "bold" }}
+                              className="headerFont">
+                              {user.username}
+                            </span>
 
-                        {/* Last Message */}
-                        {inBoxList &&
-                          inBoxList
-                            .filter(
-                              (message) =>
-                                (message?.senderId === user.id ||
-                                  message?.recepientId === user.id) &&
-                                message.recepientId !== ""
-                            )
-                            .slice(-1)
-                            .map((message, index) => (
-                              <div
-                                key={index}
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  marginTop: "5px",
-                                }}>
-                                <span
-                                  style={{
-                                    fontSize: "13px",
-                                    flex: 1,
-                                    textAlign: "left",
-                                    color:
-                                      selectedUser?.id === user.id
-                                        ? "#fff"
-                                        : "#000",
-                                    overflow: "hidden",
-                                    width: "150px",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                  }}>
-                                  {message?.text || "No message"}
-                                </span>
+                            {/* Last Message */}
+                            {inBoxList &&
+                              inBoxList
+                                .filter(
+                                  (message) =>
+                                    (message?.senderId === user.id ||
+                                      message?.recepientId === user.id) &&
+                                    message.recepientId !== ""
+                                )
+                                .slice(-1)
+                                .map((message, index) => (
+                                  <div
+                                    key={index}
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "center",
+                                      width: "100%",
+                                      marginTop: "5px",
+                                    }}>
+                                    <span
+                                      style={{
+                                        fontSize: "13px",
+                                        flex: 1,
+                                        textAlign: "left",
+                                        color:
+                                          selectedUser?.id === user.id
+                                            ? "#fff"
+                                            : "#000",
+                                        overflow: "hidden",
+                                        width: "150px",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                      }}>
+                                      {message?.text || "No message"}
+                                    </span>
 
-                                <span
-                                  style={{
-                                    fontSize: "10px",
-                                    textAlign: "right",
-                                    marginLeft: "10px",
-                                    color:
-                                      selectedUser?.id === user.id
-                                        ? "#fff"
-                                        : "#000",
-                                  }}>
-                                  {formatDate(message.createdAt)}
-                                </span>
-                              </div>
-                            ))}
-                      </div>
-                    </Paper>
-                  ))}
+                                    <span
+                                      style={{
+                                        fontSize: "10px",
+                                        textAlign: "right",
+                                        marginLeft: "10px",
+                                        color:
+                                          selectedUser?.id === user.id
+                                            ? "#fff"
+                                            : "#000",
+                                      }}>
+                                      {formatDate(message.createdAt)}
+                                    </span>
+                                  </div>
+                                ))}
+                          </div>
+                        </Paper>
+                      )
+                    )}
+                  </div>
                   {/* Small Screen Lwft side animation */}
                   {inBoxList &&
                     inBoxList.length <= 0 &&
