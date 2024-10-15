@@ -163,11 +163,14 @@ export const Chat = () => {
   }, [roomIdList, roomId]);
 
   useEffect(() => {
+    const filteredInbox = inBoxList.filter((inBox) => inBox.roomId === roomId);
+    setRoomMessageList(filteredInbox);
+  }, [inBoxList]);
+
+  useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-    const filteredInbox = inBoxList.filter((inBox) => inBox.roomId === roomId);
-    setRoomMessageList(filteredInbox);
   }, [roomMessageList]);
 
   const inBoxUsersList = useMemo(() => {
@@ -282,6 +285,8 @@ export const Chat = () => {
       activeRoomId = manualRoomId;
     }
 
+    
+    setMessage("");
     if (!roomId || roomId === "") {
       await addDoc(roomsCollection, {
         id: activeRoomId,
@@ -301,7 +306,6 @@ export const Chat = () => {
         text: message,
         createdAt: serverTimestamp(),
       });
-      setMessage("");
     }
     setRoomId(activeRoomId);
   };
@@ -546,6 +550,7 @@ export const Chat = () => {
                       </div>
                     </Paper>
                   ))}
+                  {/* Small Screen Lwft side animation */}
                   {inBoxList &&
                     inBoxList.length <= 0 &&
                     inBoxUsersList.length <= 0 && (
